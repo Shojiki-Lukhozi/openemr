@@ -48,14 +48,14 @@ RUN apk add --no-cache git build-base \
     && sed -i 's/^ *ErrorLog/#ErrorLog/' /etc/apache2/httpd.conf \
     && sed -i 's/^ *CustomLog/#CustomLog/' /etc/apache2/conf.d/ssl.conf \
     && sed -i 's/^ *TransferLog/#TransferLog/' /etc/apache2/conf.d/ssl.conf
-WORKDIR /var/www/localhost/htdocs/openemr
+WORKDIR /app
 VOLUME [ "/etc/letsencrypt/", "/etc/ssl" ]
 #configure apache & php properly
 ENV APACHE_LOG_DIR=/var/log/apache2
 COPY php.ini /etc/php82/php.ini
 COPY openemr.conf /etc/apache2/conf.d/
 #add runner and auto_configure and prevent auto_configure from being run w/o being enabled
-COPY openemr.sh ssl.sh xdebug.sh auto_configure.php /var/www/localhost/htdocs/openemr/
+COPY openemr.sh ssl.sh xdebug.sh auto_configure.php /app/
 COPY utilities/unlock_admin.php utilities/unlock_admin.sh /root/
 RUN chmod 500 openemr.sh ssl.sh xdebug.sh /root/unlock_admin.sh \
     && chmod 000 auto_configure.php /root/unlock_admin.php
@@ -82,7 +82,7 @@ COPY utilities/devtoolsLibrary.source /root/
 #Ensure swarm/orchestration pieces are available if needed
 RUN mkdir /swarm-pieces \
     && rsync --owner --group --perms --delete --recursive --links /etc/ssl /swarm-pieces/ \
-    && rsync --owner --group --perms --delete --recursive --links /var/www/localhost/htdocs/openemr/sites /swarm-pieces/
+    && rsync --owner --group --perms --delete --recursive --links /app/sites /swarm-pieces/
 #go
 CMD [ "./openemr.sh" ]
 
